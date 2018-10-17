@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "centos/7"
+  config.vm.box_version = "1804.02"
+
+  config.ssh.forward_agent = true
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+	vb.memory = 2048
+    vb.cpus = 2
+  end
+  
+  config.proxy.http             = "http://10.0.2.2:3128"
+  config.proxy.https            = "http://10.0.2.2:3128"
+  #config.proxy.no_proxy         = "localhost,127.0.0.1"
+  
+  config.vm.provision "shell", path: "./provision.sh"
+
+  # application
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  # Debug Port for Spring Boot (Tomcat)
+  config.vm.network "forwarded_port", guest: 7777, host: 7777
+
+  config.vm.synced_folder "..", "/mount"
+end
